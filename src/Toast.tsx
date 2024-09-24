@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { bus } from "./EventBus";
+import { useEffect, useState } from "react";
+import { bus } from "./eventBus";
 import "./toast.css";
 import { createPortal } from "react-dom";
+import { ToastType } from "./types";
 
 const Toast = () => {
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState<ToastType[]>([]);
   console.log(toasts);
   useEffect(() => {
-    const handleToastEvent = (toast) => {
+    const handleToastEvent = (toast: Omit<ToastType, "id">) => {
       const id = Date.now();
       setToasts((prev) => [...prev, { id, ...toast }]);
 
@@ -16,12 +17,12 @@ const Toast = () => {
         setToasts((prev) => prev.filter((toast) => toast.id !== id));
       }, duration);
     };
-    const unsubscribe = bus.subscribe("SHOW_TOAST", handleToastEvent);
+    const unsubscribe = bus.subscribe({topic: "SHOW_TOAST", listener: handleToastEvent});
 
     return () => unsubscribe();
   }, []);
 
-  const closeToast = (id) => {
+  const closeToast = (id: number) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   };
 
@@ -46,7 +47,7 @@ const Toast = () => {
         </div>
       ))}
     </div>,
-    document.getElementById("toast-container")
+    document.getElementById("toast-container") as HTMLElement
   );
 };
 
